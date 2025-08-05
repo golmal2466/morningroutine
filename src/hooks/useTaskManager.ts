@@ -7,6 +7,7 @@ export const useTaskManager = (user: User | null) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ユーザー情報が確定したら、その人のタスクをSupabaseから取得する
   const fetchTasks = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -15,7 +16,7 @@ export const useTaskManager = (user: User | null) => {
         .from('todos')
         .select('*')
         .eq('user_id', user.id)
-        .order('order', { ascending: true });
+        .order('order', { ascending: true }); // order列で並び替え！
 
       if (error) throw error;
       if (data) setTasks(data);
@@ -30,6 +31,7 @@ export const useTaskManager = (user: User | null) => {
     fetchTasks();
   }, [fetchTasks]);
 
+  // タスクを追加する関数
   const addTask = useCallback(
     async (task: string, minutes: number, category: 'child' | 'adult') => {
       if (!user) return;
@@ -48,7 +50,8 @@ export const useTaskManager = (user: User | null) => {
     [user]
   );
 
-  const updateTask = useCallback(async (id: number, newValues: Partial<Omit<Task, 'id'>>) => {
+  // タスクを更新する関数
+  const updateTask = useCallback(async (id: number, newValues: Partial<Omit<Task, 'id' | 'user_id' | 'created_at'>>) => {
     try {
       const { data, error } = await supabase
         .from('todos')
@@ -65,6 +68,7 @@ export const useTaskManager = (user: User | null) => {
     }
   }, []);
 
+  // タスクを削除する関数
   const deleteTask = useCallback(async (id: number) => {
     try {
       const { error } = await supabase.from('todos').delete().eq('id', id);
@@ -75,36 +79,50 @@ export const useTaskManager = (user: User | null) => {
     }
   }, []);
 
+  // タスクの完了状態を切り替える関数
   const toggleTask = useCallback((id: number, is_complete: boolean) => {
     updateTask(id, { is_complete: !is_complete });
   }, [updateTask]);
   
+  // 全てのタスクを未完了に戻す関数
   const clearAllCompleted = useCallback(async () => {
     if (!user) return;
     try {
-        // 注意：Supabaseでは一括更新・削除は追加設定が必要な場合があるため、
-        // まずは画面上だけでリセットする形にします。
-        // 本格的には、完了済みタスクを一つずつ更新 or 削除するループを書きます。
-        setTasks(prev =>
-            prev.map(task => ({ ...task, is_complete: false }))
-        );
-        // ここで、Supabase上の完了済みタスクを更新する処理を追加するのが理想
+      // Supabase上の完了済みタスクをすべて未完了に更新
+      const { error } = await supabase
+        .from('todos')
+        .update({ is_complete: false })
+        .eq('user_id', user.id)
+        .eq('is_complete', true);
+        
+      if (error) throw error;
+      // 画面上も更新
+      setTasks(prev =>
+          prev.map(task => ({ ...task, is_complete: false }))
+      );
     } catch(error) {
         console.error('Error clearing tasks:', error)
     }
   }, [user]);
 
+  // タスクの並び順を更新する関数
   const reorderTasks = useCallback(async (dragIndex: number, dropIndex: number, category: 'child' | 'adult') => {
-    // この機能は複雑なので、まずはローカルでの並び替えのみを実装します
-    // 本格的には、並び替え後の全タスクの'order'列を更新する処理が必要です
+    // この機能は非常に複雑なため、まずは画面上の表示だけを更新します。
+    // データベースの永続化は、次のステップで挑戦しましょう！
     setTasks(prevTasks => {
-        const uncompleted = prevTasks.filter(t => !t.is_complete && t.category === category);
+        const targetUncompleted = prevTasks.filter(t => !t.is_complete && t.category === category);
         const otherTasks = prevTasks.filter(t => t.is_complete || t.category !== category);
         
-        const [draggedItem] = uncompleted.splice(dragIndex, 1);
-        uncompleted.splice(dropIndex, 0, draggedItem);
+        const [draggedItem] = targetUncompleted.splice(dragIndex, 1);
+        targetUncompleted.splice(dropIndex, 0, draggedItem);
         
-        return [...uncompleted, ...otherTasks];
+        if(category === 'child') {
+            const adultUncompleted = prevTasks.filter(t => !t.is_complete && t.category === 'adult');
+            return [...targetUncompleted, ...adultUncompleted, ...otherTasks];
+        } else {
+            const childUncompleted = prevTasks.filter(t => !t.is_complete && t.category === 'child');
+            return [...childUncompleted, ...targetUncompleted, ...otherTasks];
+        }
     });
   }, []);
 
