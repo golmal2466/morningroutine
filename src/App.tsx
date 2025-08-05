@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Session } from '@supabase/supabase-js'
 import AuthPage from '@/pages/AuthPage'
-import AppRoutes from '@/routes/AppRoutes'; // 新しい交通整理係！
+import AppRoutes from '@/routes/AppRoutes';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import ThemeApplicator from '@/components/ThemeApplicator'; // ← これを追加！
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -26,14 +27,14 @@ function App() {
   }, [])
 
   if (loading) {
-    return <div>読み込み中...</div>; // 最初のセッション確認中にローディング表示
+    return <div>読み込み中...</div>;
   }
 
   return (
-    // SettingsProviderでアプリ全体を包む！
-    // これで、どこからでも、ログインユーザーの設定にアクセスできる
     <SettingsProvider user={session?.user ?? null}>
-      {/* sessionがなければ玄関へ、あれば家の中（AppRoutes）へ */}
+      {/* ↓↓↓↓↓↓ ここが、最後の「配線工事」です！ ↓↓↓↓↓↓ */}
+      <ThemeApplicator /> 
+      {/* ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ */}
       {!session ? <AuthPage /> : <AppRoutes />}
     </SettingsProvider>
   )
