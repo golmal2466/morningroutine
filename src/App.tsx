@@ -4,7 +4,6 @@ import { Session } from '@supabase/supabase-js'
 import AuthPage from '@/pages/AuthPage'
 import AppRoutes from '@/routes/AppRoutes';
 import { SettingsProvider } from '@/contexts/SettingsContext';
-import ThemeApplicator from '@/components/ThemeApplicator'; // ← これを追加！
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -32,9 +31,7 @@ function App() {
 
   return (
     <SettingsProvider user={session?.user ?? null}>
-      {/* ↓↓↓↓↓↓ ここが、最後の「配線工事」です！ ↓↓↓↓↓↓ */}
-      <ThemeApplicator /> 
-      {/* ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ */}
+      {/* ここから、ThemeApplicatorを削除しました！ */}
       {!session ? <AuthPage /> : <AppRoutes />}
     </SettingsProvider>
   )
