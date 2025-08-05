@@ -1,13 +1,15 @@
+// src/components/TaskItem.tsx
 
 import React, { useState } from 'react';
-import { Task } from '@/types/index';
+import { Task } from '@/types'; // 型定義はtypes/index.tsから読み込まれる
 import { CheckIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/components/icons';
 
 interface TaskItemProps {
   task: Task;
-  onToggle: (id: string) => void;
-  updateTask: (id: string, newValues: Partial<Omit<Task, 'id'>>) => void;
-  onDelete: (id: string) => void;
+  // 修正点 1/8: idの型をstringからnumberに変更
+  onToggle: (id: number, is_complete: boolean) => void; 
+  updateTask: (id: number, newValues: Partial<Omit<Task, 'id'>>) => void;
+  onDelete: (id: number) => void;
   isDraggable: boolean;
   isDragging?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
@@ -22,12 +24,13 @@ interface TaskItemProps {
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelete, isDraggable, isDragging, onMoveUp, onMoveDown, isFirst, isLast, ...dndProps }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editText, setEditText] = useState(task.text);
-  const [editDuration, setEditDuration] = useState(String(task.duration));
+  const [editText, setEditText] = useState(task.task); // 修正点 2/8: text -> task
+  const [editMinutes, setEditMinutes] = useState(String(task.minutes)); // 修正点 3/8: duration -> minutes
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onToggle(task.id);
+    // 修正点 4/8: is_completeを渡す
+    onToggle(task.id, task.is_complete); 
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
@@ -36,17 +39,18 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
   };
 
   const handleSave = () => {
-    const durationNum = parseInt(editDuration, 10);
-    if (editText.trim() && !isNaN(durationNum) && durationNum > 0) {
-      updateTask(task.id, { text: editText.trim(), duration: durationNum });
+    const minutesNum = parseInt(editMinutes, 10);
+    if (editText.trim() && !isNaN(minutesNum) && minutesNum > 0) {
+      // 修正点 5/8: text -> task, duration -> minutes
+      updateTask(task.id, { task: editText.trim(), minutes: minutesNum });
     }
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditText(task.text);
-    setEditDuration(String(task.duration));
+    setEditText(task.task);
+    setEditMinutes(String(task.minutes));
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -59,7 +63,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!task.completed) {
+    // 修正点 6/8: completed -> is_complete
+    if (!task.is_complete) {
       setIsEditing(true);
     }
   };
@@ -77,13 +82,14 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
             onClick={handleCheckboxClick}
             disabled={isEditing}
             className={`w-7 h-7 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ${
-              task.completed
+              // 修正点 7/8: completed -> is_complete
+              task.is_complete
                 ? 'bg-primary-600 border-primary-600'
                 : 'bg-transparent border-slate-400 group-hover:border-primary-500'
             } ${isEditing ? 'cursor-not-allowed bg-slate-200 dark:bg-slate-700' : ''}`}
-            aria-label={task.completed ? 'Mark task as incomplete' : 'Mark task as complete'}
+            aria-label={task.is_complete ? 'Mark task as incomplete' : 'Mark task as complete'}
           >
-            {task.completed && !isEditing && <CheckIcon className="w-5 h-5 text-white" />}
+            {task.is_complete && !isEditing && <CheckIcon className="w-5 h-5 text-white" />}
           </button>
         </div>
         
@@ -103,8 +109,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
                   <div className="flex items-center gap-2">
                       <input
                         type="number"
-                        value={editDuration}
-                        onChange={(e) => setEditDuration(e.target.value)}
+                        value={editMinutes}
+                        onChange={(e) => setEditMinutes(e.target.value)}
                         onKeyDown={handleKeyDown}
                         min="1"
                         className="block w-20 px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm text-right"
@@ -122,12 +128,13 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
             </>
           ) : (
             <div onClick={handleEditClick} className="cursor-pointer">
-              <div className={`transition-colors ${task.completed ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'}`}>
-                <p className="font-medium break-words">{task.text}</p>
+              <div className={`transition-colors ${task.is_complete ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'}`}>
+                <p className="font-medium break-words">{task.task}</p>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <div className={`transition-colors ${task.completed ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-600 dark:text-slate-400'}`}>
-                  <span className="font-semibold text-base sm:text-lg">{task.duration}</span>
+                <div className={`transition-colors ${task.is_complete ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-600 dark:text-slate-400'}`}>
+                  {/* 修正点 8/8: duration -> minutes */}
+                  <span className="font-semibold text-base sm:text-lg">{task.minutes}</span>
                   <span className="text-sm"> 分</span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -157,7 +164,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
                     type="button"
                     onClick={handleDeleteClick}
                     className="p-1 rounded-full text-slate-400 hover:bg-red-100 dark:hover:bg-slate-700 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                    aria-label={`Delete task: ${task.text}`}
+                    aria-label={`Delete task: ${task.task}`}
                   >
                     <TrashIcon className="w-5 h-5"/>
                   </button>
