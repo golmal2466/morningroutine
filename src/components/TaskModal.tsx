@@ -1,23 +1,25 @@
+// src/components/TaskModal.tsx
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Task } from '@/types';
+// Task型はここでは不要なので削除
 
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (taskData: { text: string, duration: number, category: 'child' | 'adult' }) => void;
+  // 修正点 1/3: onSaveが受け取るデータの型を修正
+  onSave: (taskData: { task: string, minutes: number, category: 'child' | 'adult' }) => void;
 }
 
 const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
-  const [text, setText] = useState('');
-  const [duration, setDuration] = useState('');
+  const [task, setTask] = useState(''); // 修正点 2/3: text -> task
+  const [minutes, setMinutes] = useState(''); // 修正点 2/3: duration -> minutes
   const [category, setCategory] = useState<'child' | 'adult'>('child');
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setText('');
-      setDuration('');
+      setTask('');
+      setMinutes('');
       setCategory('child');
     }
   }, [isOpen]);
@@ -37,9 +39,10 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
   }, [isOpen, onClose]);
 
   const handleSave = () => {
-    const durationNum = parseInt(duration, 10);
-    if (text.trim() && !isNaN(durationNum) && durationNum > 0) {
-      onSave({ text: text.trim(), duration: durationNum, category });
+    const minutesNum = parseInt(minutes, 10);
+    if (task.trim() && !isNaN(minutesNum) && minutesNum > 0) {
+      // 修正点 3/3: 渡すオブジェクトのプロパティ名を修正
+      onSave({ task: task.trim(), minutes: minutesNum, category });
       onClose();
     }
   };
@@ -86,8 +89,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
             <input
               type="text"
               id="task-text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
+              value={task}
+              onChange={(e) => setTask(e.target.value)}
               className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm"
               placeholder="例: 朝食を食べる"
             />
@@ -97,8 +100,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
             <input
               type="number"
               id="task-duration"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
               className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm"
               placeholder="例: 15"
               min="1"
