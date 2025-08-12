@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
+import './index.css' // ← この一行が、必ず、必要です！
 import { AuthProvider } from './contexts/AuthContext.tsx' // 私たちが作った「大司令塔」をインポート！
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
