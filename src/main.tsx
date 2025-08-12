@@ -1,14 +1,10 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
 import App from './App.tsx'
-import './index.css' // ← この一行が、必ず、必要です！
-import { AuthProvider } from './contexts/AuthContext.tsx' // 私たちが作った「大司令塔」をインポート！
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    {/* AuthProviderという大司令塔で、アプリ全体を、丸ごと包む！ */}
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </React.StrictMode>,
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
 )

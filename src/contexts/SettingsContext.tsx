@@ -1,7 +1,8 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext} from 'react';
+import type { ReactNode } from 'react';
 import { useSettingsManager } from '@/hooks/useSettingsManager';
-import { Settings } from '@/types';
-import { User } from '@supabase/supabase-js';
+import type { Settings } from '@/types';
+import type { User } from '@supabase/supabase-js';
 
 // Contextが提供する情報の型を定義
 interface SettingsContextType {

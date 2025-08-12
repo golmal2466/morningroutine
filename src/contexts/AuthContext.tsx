@@ -1,6 +1,11 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Session, User } from '@supabase/supabase-js';
+import type { Session, User } from '@supabase/supabase-js';
+import react from '@vitejs/plugin-react'
+export default {
+  plugins: [react()]
+}
 
 interface AuthContextType {
   session: Session | null;

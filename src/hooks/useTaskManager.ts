@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Task } from '@/types';
+import type { Task } from '@/types';
 import { supabase } from '@/lib/supabaseClient';
-import { User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 
 export const useTaskManager = (user: User | null) => {
   const [tasks, setTasks] = useState<Task[]>([]);

@@ -5,7 +5,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import TaskItem from '@/components/TaskItem';
 import MainFooter from '@/components/MainFooter';
 import TaskModal from '@/components/TaskModal';
-import { Task } from '@/types'; // 型定義をインポート
+import type { Task } from '@/types'; // 型定義をインポート
 
 const MainPage: React.FC = () => {
   const { user } = useAuth();

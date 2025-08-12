@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { THEMES, ThemeName } from '@/lib/themes';
+import { THEMES } from '@/lib/themes';
+import type { ThemeName } from '@/lib/themes';
 
 const ThemeApplicator: React.FC = () => {
   const { settings } = useSettings();

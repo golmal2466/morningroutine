@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Settings } from '@/types';
+import type { Settings } from '@/types';
 import { supabase } from '@/lib/supabaseClient'; // 我らが会話係！
-import { User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 
 // ユーザー情報を引数で受け取るように変更
 export const useSettingsManager = (user: User | null) => {

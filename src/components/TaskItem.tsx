@@ -1,7 +1,7 @@
 // src/components/TaskItem.tsx
 
 import React, { useState } from 'react';
-import { Task } from '@/types'; // 型定義はtypes/index.tsから読み込まれる
+import type { Task } from '@/types'; // 型定義はtypes/index.tsから読み込まれる
 import { CheckIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/components/icons';
 
 interface TaskItemProps {
