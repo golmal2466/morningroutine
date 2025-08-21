@@ -132,8 +132,8 @@ const MainPage: React.FC = () => {
           <div className="flex items-center justify-around text-center">
             <div className="flex-1">
               <p className={`text-base ${showWarning ? 'text-red-100 dark:text-red-200' : 'text-slate-500 dark:text-slate-400'}`}>出発まであと</p>
-              <p className={`text-4xl sm:text-5xl font-bold ${showWarning ? 'text-white' : 'text-primary-600 dark:text-primary-400'}`}>
-                {departureTimeLeft} <span className="text-xl sm:text-2xl font-medium">分</span>
+              <p className={`text-4xl sm:text-5xl font-bold ${showWarning ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                 {departureTimeLeft} <span className="text-xl sm:text-2xl font-medium">分</span>
               </p>
             </div>
             
