@@ -176,8 +176,8 @@ const MainPage: React.FC = () => {
                                   onDragOver={handleDragOver}
                                   onDrop={(e) => handleDrop(e, index, 'child')}
                                   onDragEnd={handleDragEnd}
-                                  onMoveUp={() => reorderTasks(index, index - 1, 'child')}
-                                  onMoveDown={() => reorderTasks(index, index + 1, 'child')}
+                                  onMoveUp={() => reorderTasks(task.id, 'up')}
+                                  onMoveDown={() => reorderTasks(task.id, 'down')}
                                   isFirst={index === 0}
                                   isLast={index === childUncompleted.length - 1}
                                 />
@@ -225,8 +225,8 @@ const MainPage: React.FC = () => {
                                   onDragOver={handleDragOver}
                                   onDrop={(e) => handleDrop(e, index, 'adult')}
                                   onDragEnd={handleDragEnd}
-                                  onMoveUp={() => reorderTasks(index, index - 1, 'adult')}
-                                  onMoveDown={() => reorderTasks(index, index + 1, 'adult')}
+                                  onMoveUp={() => reorderTasks(task.id, 'up')}
+                                  onMoveDown={() => reorderTasks(task.id, 'down')}
                                   isFirst={index === 0}
                                   isLast={index === adultUncompleted.length - 1}
                                 />

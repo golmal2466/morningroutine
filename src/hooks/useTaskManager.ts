@@ -1,131 +1,188 @@
-import { useState, useEffect, useCallback } from 'react';
+// useTaskManager: タスクの取得・更新を司るフック
+import { useCallback, useEffect, useState } from 'react';
 import type { Task } from '@/types';
-import { supabase } from '@/lib/supabaseClient';
 import type { User } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 
 export const useTaskManager = (user: User | null) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ユーザー情報が確定したら、その人のタスクをSupabaseから取得する
-  const fetchTasks = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('todos')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('order', { ascending: true }); // order列で並び替え！
-
-      if (error) throw error;
-      if (data) setTasks(data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
+  // 初期取得
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
-
-  // タスクを追加する関数
-  const addTask = useCallback(
-    async (task: string, minutes: number, category: 'child' | 'adult') => {
-      if (!user) return;
+    if (!user) return;
+    const fetchTasks = async () => {
+      setLoading(true);
       try {
         const { data, error } = await supabase
           .from('todos')
-          .insert({ task, minutes, category, user_id: user.id })
+          .select('*')
+          .eq('user_id', user.id)
+          .order('order', { ascending: true })
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+        setTasks((data ?? []) as Task[]);
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTasks();
+  }, [user]);
+
+  const addTask = useCallback(
+    async (taskText: string, minutes: number, category: 'child' | 'adult') => {
+      if (!user) return;
+      try {
+        const nextOrder = tasks.filter(t => !t.is_complete).length;
+        const insert = {
+          user_id: user.id,
+          task: taskText,
+          minutes,
+          category,
+          is_complete: false,
+          order: nextOrder,
+        };
+        const { data, error } = await supabase
+          .from('todos')
+          .insert(insert)
           .select()
           .single();
         if (error) throw error;
-        if (data) setTasks((prev) => [...prev, data]);
-      } catch (error) {
-        console.error('Error adding task:', error);
+        if (data) setTasks(prev => [...prev, data as Task]);
+      } catch (err) {
+        console.error('Error adding task:', err);
       }
     },
-    [user]
+    [user, tasks]
   );
 
-  // タスクを更新する関数
-  const updateTask = useCallback(async (id: number, newValues: Partial<Omit<Task, 'id' | 'user_id' | 'created_at'>>) => {
-    try {
-      const { data, error } = await supabase
-        .from('todos')
-        .update(newValues)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      if (data) {
-        setTasks((prev) => prev.map((t) => (t.id === id ? data : t)));
+  const updateTask = useCallback(
+    async (id: number, newValues: Partial<Omit<Task, 'id'>>) => {
+      try {
+        const { data, error } = await supabase
+          .from('todos')
+          .update(newValues)
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) {
+          setTasks(prev => prev.map(t => (t.id === id ? (data as Task) : t)));
+        }
+      } catch (err) {
+        console.error('Error updating task:', err);
       }
-    } catch (error) {
-      console.error('Error updating task:', error);
-    }
-  }, []);
+    },
+    []
+  );
 
-  // タスクを削除する関数
   const deleteTask = useCallback(async (id: number) => {
     try {
       const { error } = await supabase.from('todos').delete().eq('id', id);
       if (error) throw error;
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-    } catch (error) {
-      console.error('Error deleting task:', error);
+      setTasks(prev => prev.filter(t => t.id !== id));
+    } catch (err) {
+      console.error('Error deleting task:', err);
     }
   }, []);
 
-  // タスクの完了状態を切り替える関数
-  const toggleTask = useCallback((id: number, is_complete: boolean) => {
-    updateTask(id, { is_complete: !is_complete });
-  }, [updateTask]);
-  
-  // 全てのタスクを未完了に戻す関数
-  const clearAllCompleted = useCallback(async () => {
-    if (!user) return;
+  const toggleTask = useCallback(async (id: number, is_complete: boolean) => {
     try {
-      // Supabase上の完了済みタスクをすべて未完了に更新
-      const { error } = await supabase
+      const next = !is_complete;
+      const { data, error } = await supabase
         .from('todos')
-        .update({ is_complete: false })
-        .eq('user_id', user.id)
-        .eq('is_complete', true);
-        
+        .update({ is_complete: next })
+        .eq('id', id)
+        .select()
+        .single();
       if (error) throw error;
-      // 画面上も更新
-      setTasks(prev =>
-          prev.map(task => ({ ...task, is_complete: false }))
-      );
-    } catch(error) {
-        console.error('Error clearing tasks:', error)
+      if (data) setTasks(prev => prev.map(t => (t.id === id ? (data as Task) : t)));
+    } catch (err) {
+      console.error('Error toggling task:', err);
     }
-  }, [user]);
-
-  // タスクの並び順を更新する関数
-  const reorderTasks = useCallback(async (dragIndex: number, dropIndex: number, category: 'child' | 'adult') => {
-    // この機能は非常に複雑なため、まずは画面上の表示だけを更新します。
-    // データベースの永続化は、次のステップで挑戦しましょう！
-    setTasks(prevTasks => {
-        const targetUncompleted = prevTasks.filter(t => !t.is_complete && t.category === category);
-        const otherTasks = prevTasks.filter(t => t.is_complete || t.category !== category);
-        
-        const [draggedItem] = targetUncompleted.splice(dragIndex, 1);
-        targetUncompleted.splice(dropIndex, 0, draggedItem);
-        
-        if(category === 'child') {
-            const adultUncompleted = prevTasks.filter(t => !t.is_complete && t.category === 'adult');
-            return [...targetUncompleted, ...adultUncompleted, ...otherTasks];
-        } else {
-            const childUncompleted = prevTasks.filter(t => !t.is_complete && t.category === 'child');
-            return [...childUncompleted, ...targetUncompleted, ...otherTasks];
-        }
-    });
   }, []);
 
+  const clearAllCompleted = useCallback(async () => {
+    try {
+      const completedIds = tasks.filter(t => t.is_complete).map(t => t.id);
+      if (completedIds.length) {
+        const { error } = await supabase.from('todos').delete().in('id', completedIds);
+        if (error) throw error;
+        setTasks(prev => prev.filter(t => !t.is_complete));
+      }
+    } catch (err) {
+      console.error('Error clearing completed:', err);
+    }
+  }, [tasks]);
+
+  // オーバーロード対応: DnD or Up/Down
+  const reorderTasks = useCallback(
+    async (
+      a: number,
+      b: number | 'up' | 'down',
+      c?: 'child' | 'adult'
+    ) => {
+      let reordered: Task[] = [];
+
+      setTasks(prevTasks => {
+        const childUncompleted = prevTasks.filter(t => !t.is_complete && t.category === 'child');
+        const adultUncompleted = prevTasks.filter(t => !t.is_complete && t.category === 'adult');
+        const completed = prevTasks.filter(t => t.is_complete);
+
+        if (typeof b === 'string') {
+          // Move up/down by id
+          const id = a;
+          const dir = b;
+          const idxChild = childUncompleted.findIndex(t => t.id === id);
+          const idxAdult = adultUncompleted.findIndex(t => t.id === id);
+          if (idxChild !== -1) {
+            const arr = childUncompleted;
+            const newIndex = Math.max(0, Math.min(arr.length - 1, idxChild + (dir === 'up' ? -1 : 1)));
+            const [item] = arr.splice(idxChild, 1);
+            arr.splice(newIndex, 0, item);
+            reordered = [...arr, ...adultUncompleted, ...completed];
+          } else if (idxAdult !== -1) {
+            const arr = adultUncompleted;
+            const newIndex = Math.max(0, Math.min(arr.length - 1, idxAdult + (dir === 'up' ? -1 : 1)));
+            const [item] = arr.splice(idxAdult, 1);
+            arr.splice(newIndex, 0, item);
+            reordered = [...childUncompleted, ...arr, ...completed];
+          } else {
+            reordered = prevTasks;
+          }
+        } else {
+          // DnD by indices and category
+          const dragIndex = a;
+          const dropIndex = b as number;
+          const category = c as 'child' | 'adult';
+          const otherUncompleted = category === 'child' ? adultUncompleted : childUncompleted;
+          const target = category === 'child' ? childUncompleted : adultUncompleted;
+          const [dragged] = target.splice(dragIndex, 1);
+          target.splice(dropIndex, 0, dragged);
+          reordered =
+            category === 'child'
+              ? [...target, ...otherUncompleted, ...completed]
+              : [...childUncompleted, ...target, ...completed];
+        }
+
+        return reordered;
+      });
+
+      try {
+        const uncompleted = reordered.filter(t => !t.is_complete);
+        const updates = uncompleted.map((task, index) => ({ id: task.id, order: index }));
+        if (updates.length) {
+          const { error } = await supabase.from('todos').upsert(updates);
+          if (error) throw error;
+        }
+      } catch (err) {
+        console.error('Error reordering tasks:', err);
+      }
+    },
+    []
+  );
 
   return { tasks, addTask, updateTask, deleteTask, toggleTask, clearAllCompleted, reorderTasks, loading };
 };
