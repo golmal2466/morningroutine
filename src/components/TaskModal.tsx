@@ -66,7 +66,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
                 className={`w-full text-center px-3 py-2 rounded-md border text-sm font-medium transition-all ${
                     category === 'child' 
                     ? 'bg-primary-500 border-primary-500 text-white shadow' 
-                    : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'
+                    : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'
                 }`}
                 >
                 子供用
@@ -77,7 +77,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
                 className={`w-full text-center px-3 py-2 rounded-md border text-sm font-medium transition-all ${
                     category === 'adult' 
                     ? 'bg-primary-500 border-primary-500 text-white shadow' 
-                    : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'
+                    : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'
                 }`}
                 >
                 自分用
@@ -91,7 +91,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
               id="task-text"
               value={task}
               onChange={(e) => setTask(e.target.value)}
-              className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm"
+              className="block w-full px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-300 border border-slate-300 dark:border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm"
               placeholder="例: 朝食を食べる"
             />
           </div>
@@ -102,7 +102,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, onSave }) => {
               id="task-duration"
               value={minutes}
               onChange={(e) => setMinutes(e.target.value)}
-              className="block w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm"
+              className="block w-full px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-300 border border-slate-300 dark:border-slate-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm"
               placeholder="例: 15"
               min="1"
             />
