@@ -108,9 +108,9 @@ export const useTaskManager = (user: User | null) => {
     try {
       const completedIds = tasks.filter(t => t.is_complete).map(t => t.id);
       if (completedIds.length) {
-        const { error } = await supabase.from('todos').delete().in('id', completedIds);
+        const { error } = await supabase.from('todos').update({ is_complete: false }).in('id', completedIds);
         if (error) throw error;
-        setTasks(prev => prev.filter(t => !t.is_complete));
+        setTasks(prev => prev.map(t => t.is_complete ? { ...t, is_complete: false } : t));
       }
     } catch (err) {
       console.error('Error clearing completed:', err);
