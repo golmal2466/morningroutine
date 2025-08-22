@@ -38,7 +38,7 @@ const SettingsPage: React.FC = () => {
                 // 修正点 1/5
                 value={settings.departure_time}
                 onChange={(e) => updateSettings({ departure_time: e.target.value })}
-                className="font-semibold bg-transparent text-primary-600 dark:text-primary-400 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1"
+                className="font-semibold bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-500 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </SettingRow>
             <SettingRow
@@ -50,7 +50,7 @@ const SettingsPage: React.FC = () => {
                 // 修正点 2/5
                 value={settings.auto_reset_time}
                 onChange={(e) => updateSettings({ auto_reset_time: e.target.value })}
-                className="font-semibold bg-transparent text-primary-600 dark:text-primary-400 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1"
+                className="font-semibold bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-500 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </SettingRow>
           </div>
