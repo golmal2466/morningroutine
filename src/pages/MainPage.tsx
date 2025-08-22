@@ -131,16 +131,16 @@ const MainPage: React.FC = () => {
         `}>
           <div className="flex items-center justify-around text-center">
             <div className="flex-1">
-              <p className={`text-base ${showWarning ? 'text-red-100 dark:text-red-200' : 'text-slate-500 dark:text-slate-400'}`}>出発まであと</p>
+              <p className={`text-base ${showWarning ? 'text-red-100 dark:text-red-200' : 'text-slate-500 dark:text-slate-200'}`}>出発まであと</p>
               <p className={`text-4xl sm:text-5xl font-bold ${showWarning ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                  {departureTimeLeft} <span className="text-xl sm:text-2xl font-medium">分</span>
               </p>
             </div>
             
-            <div className={`flex-shrink-0 self-stretch w-px mx-2 sm:mx-4 ${showWarning ? 'bg-red-400 dark:bg-red-600' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
+            <div className={`flex-shrink-0 self-stretch w-px mx-2 sm:mx-4 ${showWarning ? 'bg-red-400 dark:bg-red-600' : 'bg-slate-200 dark:bg-slate-600'}`}></div>
 
             <div className="flex-1">
-              <p className={`text-base ${showWarning ? 'text-red-100 dark:text-red-200' : 'text-slate-500 dark:text-slate-400'}`}>やること合計</p>
+              <p className={`text-base ${showWarning ? 'text-red-100 dark:text-red-200' : 'text-slate-500 dark:text-slate-200'}`}>やること合計</p>
               <p className={`text-4xl sm:text-5xl font-semibold ${showWarning ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                 {totalTaskTime} <span className="text-xl sm:text-2xl font-medium">分</span>
               </p>
@@ -183,7 +183,7 @@ const MainPage: React.FC = () => {
                                 />
                             ))
                         ) : (
-                            <p className="py-6 text-center text-slate-500 text-sm">全てのタスクが完了しました！</p>
+                            <p className="py-6 text-center text-slate-500 dark:text-slate-300 text-sm">全てのタスクが完了しました！</p>
                         )}
                     </div>
                     <div className="h-4"></div>
@@ -232,7 +232,7 @@ const MainPage: React.FC = () => {
                                 />
                             ))
                         ) : (
-                            <p className="py-6 text-center text-slate-500 text-sm">全てのタスクが完了しました！</p>
+                            <p className="py-6 text-center text-slate-500 dark:text-slate-300 text-sm">全てのタスクが完了しました！</p>
                         )}
                     </div>
                     <div className="h-4"></div>

@@ -128,11 +128,11 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
             </>
           ) : (
             <div onClick={handleEditClick} className="cursor-pointer">
-              <div className={`transition-colors ${task.is_complete ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'}`}>
+              <div className={`transition-colors ${task.is_complete ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-slate-800 dark:text-slate-100'}`}>
                 <p className="font-medium break-words">{task.task}</p>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <div className={`transition-colors ${task.is_complete ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-600 dark:text-slate-400'}`}>
+                <div className={`transition-colors ${task.is_complete ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-slate-700 dark:text-slate-200'}`}>
                   {/* 修正点 8/8: duration -> minutes */}
                   <span className="font-semibold text-base sm:text-lg">{task.minutes}</span>
                   <span className="text-sm"> 分</span>
