@@ -56,18 +56,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </section>
 
-        <section>
-          <h2 className="text-lg font-semibold border-b border-slate-200 dark:border-slate-700 pb-2 mb-2 text-slate-800 dark:text-slate-200">通知設定</h2>
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-2 divide-y divide-slate-200 dark:divide-slate-700">
-            <SettingRow
-              label="「間に合わない時」の通知"
-              description="「やること合計時間」が出発時刻に間に合わなくなった時に通知します。"
-            >
-              {/* 修正点 3/5 */}
-              <ToggleSwitch enabled={settings.notify_on_late} onChange={(value) => updateSettings({ notify_on_late: value })} />
-            </SettingRow>
-          </div>
-        </section>
+
 
         <section>
           <h2 className="text-lg font-semibold border-b border-slate-200 dark:border-slate-700 pb-2 mb-2 text-slate-800 dark:text-slate-200">アプリのカスタマイズ</h2>

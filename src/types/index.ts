@@ -15,7 +15,6 @@ export interface Settings {
   id: string; // user_idと同じ
   departure_time: string;
   auto_reset_time: string;
-  notify_on_late: boolean;
   show_clear_button: boolean;
   theme: string;
 }
