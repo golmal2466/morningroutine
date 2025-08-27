@@ -1,12 +1,15 @@
 // useTaskManager: タスクの取得・更新を司るフック
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import type { Task } from '@/types';
+import type { Settings } from '@/types';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 
 export const useTaskManager = (user: User | null) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const resetTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastResetDateRef = useRef<string>('');
 
   // 初期取得
   useEffect(() => {
@@ -30,6 +33,68 @@ export const useTaskManager = (user: User | null) => {
     };
     fetchTasks();
   }, [user]);
+
+  // 自動リセット機能
+  const setupAutoReset = useCallback((settings: Settings) => {
+    if (!settings.auto_reset_time) return;
+
+    const now = new Date();
+    const today = now.toDateString();
+    
+    // 既に今日リセット済みなら何もしない
+    if (lastResetDateRef.current === today) return;
+
+    const [resetHours, resetMinutes] = settings.auto_reset_time.split(':').map(Number);
+    const resetTime = new Date();
+    resetTime.setHours(resetHours, resetMinutes, 0, 0);
+
+    // リセット時刻が過ぎている場合、即座にリセット
+    if (resetTime <= now) {
+      performAutoReset();
+      lastResetDateRef.current = today;
+      return;
+    }
+
+    // 次のリセット時刻までの待機時間を計算
+    const timeUntilReset = resetTime.getTime() - now.getTime();
+
+    // 既存のタイマーをクリア
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+
+    // 新しいタイマーを設定
+    resetTimerRef.current = setTimeout(() => {
+      performAutoReset();
+      lastResetDateRef.current = today;
+    }, timeUntilReset);
+  }, []);
+
+  // 自動リセット実行
+  const performAutoReset = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const completedIds = tasks.filter(t => t.is_complete).map(t => t.id);
+      if (completedIds.length > 0) {
+        const { error } = await supabase
+          .from('todos')
+          .update({ is_complete: false })
+          .in('id', completedIds);
+        
+        if (error) throw error;
+        
+        // ローカル状態も更新
+        setTasks(prev => prev.map(t => 
+          t.is_complete ? { ...t, is_complete: false } : t
+        ));
+        
+        console.log(`自動リセット完了: ${completedIds.length}個のタスクをリセットしました`);
+      }
+    } catch (err) {
+      console.error('自動リセットエラー:', err);
+    }
+  }, [user, tasks]);
 
   const addTask = useCallback(
     async (taskText: string, minutes: number, category: 'child' | 'adult') => {
@@ -117,6 +182,31 @@ export const useTaskManager = (user: User | null) => {
     }
   }, [tasks]);
 
+  // 設定が変更されたときに自動リセットを再設定
+  useEffect(() => {
+    if (!user || !tasks.length) return;
+    
+    // 設定を取得して自動リセットを設定
+    const fetchSettingsAndSetupReset = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('auto_reset_time')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        if (data) {
+          setupAutoReset(data as Settings);
+        }
+      } catch (err) {
+        console.error('設定取得エラー:', err);
+      }
+    };
+
+    fetchSettingsAndSetupReset();
+  }, [user, tasks, setupAutoReset]);
+
   // オーバーロード対応: DnD or Up/Down
   const reorderTasks = useCallback(
     async (
@@ -184,5 +274,14 @@ export const useTaskManager = (user: User | null) => {
     []
   );
 
-  return { tasks, addTask, updateTask, deleteTask, toggleTask, clearAllCompleted, reorderTasks, loading };
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
+
+  return { tasks, addTask, updateTask, deleteTask, toggleTask, clearAllCompleted, reorderTasks, loading, setupAutoReset };
 };

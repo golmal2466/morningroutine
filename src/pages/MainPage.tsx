@@ -10,7 +10,7 @@ import type { Task } from '@/types'; // 型定義をインポート
 const MainPage: React.FC = () => {
   const { user } = useAuth();
   // useTaskManagerから、Supabase対応の関数たちを受け取る
-  const { tasks, addTask, updateTask, deleteTask, toggleTask, clearAllCompleted, reorderTasks, loading } = useTaskManager(user);
+  const { tasks, addTask, updateTask, deleteTask, toggleTask, clearAllCompleted, reorderTasks, loading, setupAutoReset } = useTaskManager(user);
   const { settings, loading: settingsLoading } = useSettings();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +40,13 @@ const MainPage: React.FC = () => {
     const interval = setInterval(calculateTimeLeft, 30000);
     return () => clearInterval(interval);
   }, [settings]);
+
+  // 自動リセット設定を更新
+  useEffect(() => {
+    if (settings && setupAutoReset) {
+      setupAutoReset(settings);
+    }
+  }, [settings, setupAutoReset]);
 
 
   const {
