@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import type { Task } from '@/types'; // 型定義はtypes/index.tsから読み込まれる
-import { CheckIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/components/icons';
+import { CheckIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon } from '@/components/icons';
 
 interface TaskItemProps {
   task: Task;
@@ -127,7 +127,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
               </div>
             </>
           ) : (
-            <div onClick={handleEditClick} className="cursor-pointer">
+            <div className="cursor-default">
               <div className={`transition-colors ${task.is_complete ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-slate-800 dark:text-slate-100'}`}>
                 <p className="font-medium break-words">{task.task}</p>
               </div>
@@ -160,6 +160,15 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
                       </button>
                     </div>
                   )}
+                  <button
+                    type="button"
+                    onClick={handleEditClick}
+                    disabled={task.is_complete}
+                    className="p-1 rounded-full text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 hover:text-slate-600 dark:hover:text-slate-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    aria-label={`Edit task: ${task.task}`}
+                  >
+                    <PencilIcon className="w-5 h-5"/>
+                  </button>
                   <button
                     type="button"
                     onClick={handleDeleteClick}
