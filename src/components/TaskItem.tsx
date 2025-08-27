@@ -101,7 +101,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="block w-full px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm"
+                className="block w-full px-2 py-1 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm"
                 autoFocus
                 onClick={(e) => e.stopPropagation()}
               />
@@ -113,7 +113,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, updateTask, onDelet
                         onChange={(e) => setEditMinutes(e.target.value)}
                         onKeyDown={handleKeyDown}
                         min="1"
-                        className="block w-20 px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm text-right"
+                        className="block w-20 px-2 py-1 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm text-right"
                         onClick={(e) => e.stopPropagation()}
                       />
                       <span className="text-sm text-slate-500 dark:text-slate-400">分</span>
