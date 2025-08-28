@@ -41,8 +41,10 @@ export const useTaskManager = (user: User | null) => {
     const now = new Date();
     const today = now.toDateString();
     
-    // 既に今日リセット済みなら何もしない
-    if (lastResetDateRef.current === today) return;
+    // 日付が変わった場合、リセット日をクリア
+    if (lastResetDateRef.current !== today) {
+      lastResetDateRef.current = '';
+    }
 
     const [resetHours, resetMinutes] = settings.auto_reset_time.split(':').map(Number);
     const resetTime = new Date();
@@ -50,8 +52,12 @@ export const useTaskManager = (user: User | null) => {
 
     // リセット時刻が過ぎている場合、即座にリセット
     if (resetTime <= now) {
-      performAutoReset();
-      lastResetDateRef.current = today;
+      // 今日まだリセットしていない場合のみ実行
+      if (lastResetDateRef.current !== today) {
+        performAutoReset();
+        lastResetDateRef.current = today;
+        console.log(`即座リセット実行: ${now.toLocaleString()} - 設定時刻: ${settings.auto_reset_time}`);
+      }
       return;
     }
 
@@ -67,7 +73,10 @@ export const useTaskManager = (user: User | null) => {
     resetTimerRef.current = setTimeout(() => {
       performAutoReset();
       lastResetDateRef.current = today;
+      console.log(`タイマーリセット実行: ${new Date().toLocaleString()} - 設定時刻: ${settings.auto_reset_time}`);
     }, timeUntilReset);
+
+    console.log(`自動リセット設定: ${now.toLocaleString()} - 次回リセット: ${resetTime.toLocaleString()} (${Math.round(timeUntilReset / 1000 / 60)}分後)`);
   }, []);
 
   // 自動リセット実行
@@ -205,6 +214,23 @@ export const useTaskManager = (user: User | null) => {
     };
 
     fetchSettingsAndSetupReset();
+
+    // 日付変更を検出するための定期的なチェック（1分ごと）
+    const dateCheckInterval = setInterval(() => {
+      const now = new Date();
+      const currentDate = now.toDateString();
+      
+      // 日付が変わった場合、リセット日をクリアして再設定
+      if (lastResetDateRef.current && lastResetDateRef.current !== currentDate) {
+        console.log('日付変更を検出、自動リセットを再設定します');
+        lastResetDateRef.current = '';
+        fetchSettingsAndSetupReset();
+      }
+    }, 60000); // 1分ごと
+
+    return () => {
+      clearInterval(dateCheckInterval);
+    };
   }, [user, tasks, setupAutoReset]);
 
   // オーバーロード対応: DnD or Up/Down
